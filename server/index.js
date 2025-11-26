@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const db = require('./db');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Enable CORS for all routes
 app.use(cors({
@@ -24,8 +25,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// Root route check
-app.get('/', (req, res) => {
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// API Health Check
+app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Instuto Backend is running' });
 });
 
@@ -464,6 +468,16 @@ app.post('/api/logs', async (req, res, next) => {
     } catch (e) {
         next(e);
     }
+});
+
+// Catch-all to serve index.html for any other request (client-side routing)
+app.get('*', (req, res) => {
+  const file = path.join(__dirname, '../dist/index.html');
+  res.sendFile(file, (err) => {
+    if (err) {
+        res.status(404).json({ message: "UI build not found. Please run 'npm run build' to generate static assets." });
+    }
+  });
 });
 
 // Global Error Handler

@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "Instuto Library Management System (Full Stack)",
   "main": "server/index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server/index.js",
+    "prod": "pm2 start ecosystem.config.js",
     "server": "nodemon server/index.js",
     "client": "vite",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
