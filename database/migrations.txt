@@ -1,0 +1,112 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS logs;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS copies;
+DROP TABLE IF EXISTS books;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS system_users;
+DROP TABLE IF EXISTS settings;
+
+-- System Users (Staff)
+CREATE TABLE system_users (
+  id VARCHAR(36) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  password VARCHAR(255) NOT NULL, -- Storing plain/base64 as per request
+  is_active BOOLEAN DEFAULT TRUE,
+  last_login DATETIME
+);
+
+-- Users (Borrowers)
+CREATE TABLE users (
+  id VARCHAR(50) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  email VARCHAR(255)
+);
+
+-- Books
+CREATE TABLE books (
+  id VARCHAR(36) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  authors JSON, -- Storing array as JSON
+  categories JSON,
+  isbn VARCHAR(20),
+  genre VARCHAR(100),
+  publisher VARCHAR(100),
+  published_year VARCHAR(4),
+  location_rack VARCHAR(50),
+  location_shelf VARCHAR(50),
+  loc_call_number VARCHAR(50),
+  description TEXT,
+  cover_url VARCHAR(255)
+);
+
+-- Copies
+CREATE TABLE copies (
+  id VARCHAR(36) PRIMARY KEY,
+  book_id VARCHAR(36) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  added_date DATETIME NOT NULL,
+  is_reference_only BOOLEAN DEFAULT FALSE,
+  narration TEXT,
+  FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
+);
+
+-- Transactions
+CREATE TABLE transactions (
+  id VARCHAR(36) PRIMARY KEY,
+  copy_id VARCHAR(36) NOT NULL,
+  book_id VARCHAR(36) NOT NULL,
+  user_id VARCHAR(50) NOT NULL,
+  user_name VARCHAR(255) NOT NULL,
+  issue_date DATETIME NOT NULL,
+  due_date DATETIME NOT NULL,
+  return_date DATETIME,
+  status VARCHAR(20) NOT NULL,
+  return_condition VARCHAR(20),
+  fine_amount DECIMAL(10, 2),
+  FOREIGN KEY (copy_id) REFERENCES copies(id) ON DELETE CASCADE,
+  FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
+);
+
+-- Logs
+CREATE TABLE logs (
+  id VARCHAR(36) PRIMARY KEY,
+  book_id VARCHAR(36),
+  book_title VARCHAR(255),
+  action VARCHAR(50) NOT NULL,
+  description TEXT,
+  timestamp DATETIME NOT NULL,
+  user_id VARCHAR(50),
+  user_name VARCHAR(255),
+  staff_id VARCHAR(36),
+  staff_name VARCHAR(255)
+);
+
+-- Settings
+CREATE TABLE settings (
+  setting_key VARCHAR(50) PRIMARY KEY,
+  setting_value JSON NOT NULL
+);
+
+-- Seed Data: System Users
+INSERT INTO system_users (id, name, email, role, password, is_active) VALUES 
+('admin-1', 'Library Admin', 'admin@library.edu', 'ADMIN', 'password', 1),
+('lib-1', 'John Librarian', 'librarian@library.edu', 'LIBRARIAN', 'password', 1);
+
+-- Seed Data: Settings
+INSERT INTO settings (setting_key, setting_value) VALUES 
+('authors', '[]'),
+('categories', '["Fiction", "Non-Fiction", "Science", "Technology", "History", "Arts", "Biography"]'),
+('genres', '["General", "Thriller", "Romance", "Sci-Fi", "Fantasy", "Mystery"]'),
+('publishers', '["Penguin Random House", "HarperCollins", "Simon & Schuster", "Macmillan", "Hachette"]'),
+('racks', '["A1", "A2", "B1", "B2", "C1", "C2"]'),
+('shelves', '["01", "02", "03", "04", "05"]'),
+('withdrawalReasons', '["Damaged", "Lost", "Outdated", "Duplicate", "Weeding"]'),
+('lenderTypes', '[{"name": "Student", "duration": 14}, {"name": "Faculty", "duration": 30}, {"name": "Staff", "duration": 21}]'),
+('returnFilterOptions', '[{"label": "Next 3 Days", "days": 3}, {"label": "Next 7 Days", "days": 7}, {"label": "Next 30 Days", "days": 30}]');
+
+SET FOREIGN_KEY_CHECKS = 1;
