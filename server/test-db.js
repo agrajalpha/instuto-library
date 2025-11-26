@@ -2,11 +2,11 @@
 const mysql = require('mysql2/promise');
 
 const dbConfig = {
-  host: '34.93.93.125',
+  host: 'localhost',
   port: 3306,
-  user: 'root',
-  password: 'k6A*tSYI3xQkIdQp',
-  database: 'app-instuto-com',
+  user: 'instutouser',
+  password: 'P@ssw0rd$123D',
+  database: 'app_instuto_com',
   connectTimeout: 10000
 };
 

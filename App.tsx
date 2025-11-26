@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ViewState, Toast, SystemUser, SystemRole } from './types';
 import { BooksView } from './views/BooksView';
@@ -6,6 +7,7 @@ import { SettingsView } from './views/SettingsView';
 import { LogsView } from './views/LogsView';
 import { UsersView } from './views/UsersView';
 import { LoginView } from './views/LoginView';
+import { StudentView } from './views/StudentView';
 import { db } from './services/storage';
 import { 
   LayoutDashboard, 
@@ -107,7 +109,7 @@ const App: React.FC = () => {
 
   // --- Dashboard Logic ---
   useEffect(() => {
-    if (currentUser && view === 'DASHBOARD') {
+    if (currentUser && view === 'DASHBOARD' && currentUser.role !== SystemRole.STUDENT) {
       loadDashboardData();
     }
   }, [currentUser, view]);
@@ -180,6 +182,61 @@ const App: React.FC = () => {
     );
   }
 
+  // --- STUDENT VIEW RENDER ---
+  if (currentUser.role === SystemRole.STUDENT) {
+      return (
+        <>
+           <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+                {toasts.map(t => (
+                <div key={t.id} className={`pointer-events-auto shadow-lg rounded-lg px-4 py-3 text-sm font-medium animate-in slide-in-from-right fade-in duration-300
+                    ${t.type === 'success' ? 'bg-green-600 text-white' : 
+                    t.type === 'error' ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`}>
+                    {t.message}
+                </div>
+                ))}
+            </div>
+            <StudentView 
+                currentUser={currentUser} 
+                onLogout={handleLogout} 
+                onChangePassword={() => setIsChangePassOpen(true)}
+                onNotify={addToast}
+            />
+             <Modal
+                isOpen={isChangePassOpen}
+                onClose={() => setIsChangePassOpen(false)}
+                title="Change Password"
+                footer={
+                    <>
+                        <Button variant="ghost" onClick={() => setIsChangePassOpen(false)}>Cancel</Button>
+                        <Button onClick={handleChangePassword}>Update Password</Button>
+                    </>
+                }
+            >
+                <div className="space-y-4">
+                    <div className="bg-slate-50 p-3 rounded-lg text-sm text-slate-600 mb-2">
+                        Updating password for <strong>{currentUser.email}</strong>.
+                    </div>
+                    <Input 
+                        label="New Password" 
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Minimum 6 characters"
+                    />
+                    <Input 
+                        label="Confirm Password" 
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Re-enter password"
+                    />
+                </div>
+            </Modal>
+        </>
+      );
+  }
+
+  // --- STAFF/ADMIN VIEW RENDER ---
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       

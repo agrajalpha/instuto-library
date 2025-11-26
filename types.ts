@@ -9,6 +9,7 @@ export enum UserRole {
 export enum SystemRole {
   ADMIN = 'ADMIN',
   LIBRARIAN = 'LIBRARIAN',
+  STUDENT = 'STUDENT',
 }
 
 export interface User {
