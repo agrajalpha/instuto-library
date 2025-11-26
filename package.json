@@ -13,6 +13,7 @@
     "client": "vite",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "vite build",
+    "preview": "vite preview",
     "migrate": "node server/migrate.js",
     "test-db": "node server/test-db.js",
     "test": "node server/tests.js"
